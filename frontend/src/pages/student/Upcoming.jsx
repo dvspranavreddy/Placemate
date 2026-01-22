@@ -73,18 +73,26 @@ const UpcomingDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [userCgpa, setUserCgpa] = useState(null);
+  const [preferredJobType, setPreferredJobType] = useState(() => localStorage.getItem('application_type') || null);
 
   useEffect(() => {
     const storedCgpa = localStorage.getItem('cgpa');
     const parsedCgpa = parseFloat(storedCgpa);
     if (!Number.isNaN(parsedCgpa)) setUserCgpa(parsedCgpa);
+
+    const storedJobType = localStorage.getItem('application_type');
+    if (storedJobType) setPreferredJobType(storedJobType);
   }, []);
 
   const fetchDashboardData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axiosClient.get(`/applications/dashboard`);
+      const response = await axiosClient.get(`/applications/dashboard`, {
+        params: {
+          jobType: preferredJobType || undefined,
+        },
+      });
       setJobsData(response.data);
       
     } catch (err) {
@@ -92,7 +100,7 @@ const UpcomingDashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [preferredJobType]);
 
   const checkCgpaEligibility = useCallback((job) => {
     const required = job?.min_cgpa ?? job?.minCgpa ?? job?.minCGPA;

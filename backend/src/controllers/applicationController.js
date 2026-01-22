@@ -45,12 +45,13 @@ const applicationController = {
     try {
       // Use req.user.id from auth middleware, fallback to req.query.userId
       const studentId = req.user?.id || req.query.userId; 
+      const jobType = req.query.jobType || req.query.preferred_job_type || req.query.prefered_job_type || null;
       
       if (!studentId) {
         return res.status(401).json({ message: "Authentication required (User ID missing)." });
       }
 
-      const data = await applicationService.getDashboardData(studentId);
+      const data = await applicationService.getDashboardData(studentId, jobType);
       res.json(data); 
     } catch (err) {
       console.error("Dashboard data fetching failed:", err);

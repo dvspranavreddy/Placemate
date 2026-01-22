@@ -75,7 +75,7 @@ export const applicationRepository = {
   },
 
   // Fetch eligible + applied jobs + status (already had this, improved slightly)
-  getStudentDashboardData: async (studentId, branch, cgpa) => {
+  getStudentDashboardData: async (studentId, branch, cgpa, jobType) => {
     const query = `
       SELECT
         j.job_id,
@@ -103,12 +103,16 @@ export const applicationRepository = {
         )
         OR a.user_id IS NOT NULL
     )
+      AND (
+        $4 IS NULL
+        OR LOWER(j.job_type) = LOWER($4)
+      )
     AND j.job_status NOT IN ('in review', 'in negotiation', 'in initial stage')
 ORDER BY 
     j.application_deadline DESC NULLS LAST,
     j.created_at DESC;
     `;
-    const { rows } = await pool.query(query, [studentId, branch, cgpa]);
+      const { rows } = await pool.query(query, [studentId, branch, cgpa, jobType || null]);
 
     return rows.map(row => {
       const today = new Date();

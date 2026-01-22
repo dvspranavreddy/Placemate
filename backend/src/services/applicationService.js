@@ -64,19 +64,21 @@ export const applicationService = {
   },
   
   // 👇 NEW FUNCTION: Get dashboard data
-  getDashboardData: async (studentId) => {
+  getDashboardData: async (studentId, jobType) => {
     const profile = await applicationRepository.getStudentProfile(studentId); 
     
     if (!profile) {
         throw new Error("Student profile not found. Cannot determine job eligibility.");
     }
     
-    const { branch, cgpa } = profile; 
+    const { branch, cgpa, prefered_job_type, preferred_job_type, application_type } = profile; 
+    const effectiveJobType = jobType || prefered_job_type || preferred_job_type || application_type || null;
     
     const dashboardData = await applicationRepository.getStudentDashboardData(
         studentId, 
         branch, 
-        cgpa
+        cgpa,
+        effectiveJobType
     );
     
     return dashboardData;
